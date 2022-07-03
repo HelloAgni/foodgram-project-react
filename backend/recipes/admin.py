@@ -1,14 +1,21 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Tag, IngredientAmount
+from .models import Ingredient, IngredientAmount, Recipe, Tag
+
+
+class IngredientAmountAdmin(admin.TabularInline):
+    model = IngredientAmount
+    autocomplete_fields = ('ingredient',)
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    inlines = (IngredientAmountAdmin,)
     list_display = (
-        'id', 'name', 'author', 'text'
+        'id', 'name', 'author', 'text', 'pub_date'
     )
     search_fields = ('name', 'author', 'tags')
-    list_filter = ('name', 'author', 'tags')
+    list_filter = ('name', 'author', 'tags', 'pub_date')
+    filter_vertical = ('tags',)
     empy_value_display = '-пусто-'
 
 
@@ -33,4 +40,3 @@ class TagAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(IngredientAmount)

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 User = get_user_model()
@@ -22,8 +23,6 @@ class Tag(models.Model):
         'Slug тега',
         max_length=200,
         unique=True,
-        null=True,
-        blank=True,
     )
 
     class Meta:
@@ -48,6 +47,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        ordering = ('name',)
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -58,7 +58,7 @@ class Recipe(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор рецепта',
-        related_name='recipes',
+        related_name='recipe',
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -72,7 +72,9 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Изображение рецепта',
-        upload_to='recipes/',
+        upload_to='recipes/images',
+        blank=True,
+        null=True,
     )
     name = models.CharField(
         'Название рецепта',
@@ -84,35 +86,47 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         'Время приготовления',
         default=1,
+        validators=(MinValueValidator(1, 'Минимум 1 минута'),),
     )
+    pub_date = models.DateTimeField(
+        'Дата публикации рецепта',
+        auto_now_add=True)
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return f'{self.author}, {self.name}'
 
-    
+
 class IngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='В рецептах',
-        related_name='recipes',
+        related_name='recipe',
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Все ингредиенты',
-        related_name='ingredients',
+        related_name='ingredient',
     )
-    amount = models.PositiveIntegerField('Количество',)
+    amount = models.PositiveIntegerField(
+        'Количество',
+        default=1,
+        validators=(MinValueValidator(1, 'Минимум 1'),),
+        )
 
     class Meta:
-        ordering = ('recipe',)
+        ordering = ('id',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
+        constraints = (
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique ingredient'),
+            )
 
     def __str__(self):
         return f'{self.amount}, {self.recipe}, {self.ingredient}'
