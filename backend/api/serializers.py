@@ -70,10 +70,10 @@ class RecipeEditSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         max_length=None,
         use_url=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Tag.objects.all()
-        )
+    # tags = serializers.PrimaryKeyRelatedField(
+    #     many=True,
+    #     queryset=Tag.objects.all()
+    #     )
     ingredients = IngredientsEditSerializer(
         many=True)
 
@@ -81,28 +81,38 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
         read_only_fields = ('author',)
+        extra_kwargs = {'tags': {"error_messages": {
+            "does_not_exist": "Ошибка в Тэге, id = {pk_value} не существует"}}}
 
     def validate(self, data):
         name = data['name']
         if len(name) < 4:
-            raise serializers.ValidationError(
-                    'Название рецепта минимум 4 символа')
+            raise serializers.ValidationError({
+                    'name': 'Название рецепта минимум 4 символа'})
         ingredients = data['ingredients']
-        ingredients_list = []
-        for items in ingredients:
-            if items['id'] in ingredients_list:
-                raise serializers.ValidationError(
-                    'Ингредиенты не должны повторяться!')
-            ingredients_list.append(items['id'])
+        for ingredient in ingredients:
+            if not Ingredient.objects.filter(
+                    id=ingredient['id']).exists():
+                raise serializers.ValidationError({
+                    'ingredients': f'Ингредиента с id - {ingredient["id"]} нет'
+                })
+        if len(ingredients) != len(set([item['id'] for item in ingredients])):
+            raise serializers.ValidationError({
+                    'ingredients': 'Ингредиенты не должны повторяться!'})
         tags = data['tags']
-        if not tags:
-            raise serializers.ValidationError(
-                'Укажите минимум один Тэг')
+        if len(tags) != len(set([item for item in tags])):
+            raise serializers.ValidationError({
+                    'tags': 'Тэги не должны повторяться!'})
+        amounts = data['ingredients']
+        if [item for item in amounts if item['amount'] < 1]:
+            raise serializers.ValidationError({
+                'amount': 'Минимальное количество ингридиента 1'
+            })
         cooking_time = data['cooking_time']
-        if cooking_time > 500 or cooking_time < 1:
-            raise serializers.ValidationError(
-                'Проверьте время приготовления блюда'
-                )
+        if cooking_time > 300 or cooking_time < 1:
+            raise serializers.ValidationError({
+                'cooking_time': 'Время приготовления блюда от 1 до 300 минут'
+                })
         return data
 
     def create_ingredients(self, ingredients, recipe):
