@@ -4,6 +4,38 @@ from rest_framework import serializers
 from users.models import User
 
 
+class UserCreatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate(self, data):
+        check_fields = set(self.initial_data) ^ set(data)
+        if check_fields:
+            raise serializers.ValidationError(
+                f'Указаны лишние поля: {[x for x in check_fields]}')
+        username = data.get('username')
+        if len(username) < 4:
+            raise serializers.ValidationError({
+                'username': 'Минимальное количество символов 4'
+            })
+        password = data.get('password')
+        if len(password) < 7:
+            raise serializers.ValidationError({
+                'password': 'Минимальное количество символов 7'
+            })
+        return data
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -76,11 +108,12 @@ class RecipeEditSerializer(serializers.ModelSerializer):
     #     )
     ingredients = IngredientsEditSerializer(
         many=True)
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Recipe
         fields = '__all__'
-        read_only_fields = ('author',)
+        # read_only_fields = ('author',)
         extra_kwargs = {'tags': {"error_messages": {
             "does_not_exist": "Ошибка в Тэге, id = {pk_value} не существует"}}}
 

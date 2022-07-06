@@ -4,12 +4,18 @@ from rest_framework.permissions import SAFE_METHODS
 from users.models import User
 
 from .serializers import (IngredientSerializer, RecipeEditSerializer,
-                          RecipeReadSerializer, TagSerializer, UserSerializer)
+                          RecipeReadSerializer, TagSerializer,
+                          UserCreatSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    # serializer_class = UserSerializer
+
+    def get_serializer_class(self):
+        if self.request.method in SAFE_METHODS:
+            return UserSerializer
+        return UserCreatSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
