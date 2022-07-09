@@ -4,3 +4,4 @@ djangorestframework==3.13.1
 Pillow==9.1.1
 pytz==2022.1
 sqlparse==0.4.2
+djoser==2.1.0

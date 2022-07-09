@@ -1,46 +1,30 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
+from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
+                                UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
 from rest_framework import serializers
-from users.models import User
+
+User = get_user_model()
 
 
-class UserCreatSerializer(serializers.ModelSerializer):
+class UserListSerializer(UserSerializer):
     class Meta:
         model = User
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def validate(self, data):
-        check_fields = set(self.initial_data) ^ set(data)
-        if check_fields:
-            raise serializers.ValidationError(
-                f'Указаны лишние поля: {[x for x in check_fields]}')
-        username = data.get('username')
-        if len(username) < 4:
-            raise serializers.ValidationError({
-                'username': 'Минимальное количество символов 4'
-            })
-        password = data.get('password')
-        if len(password) < 7:
-            raise serializers.ValidationError({
-                'password': 'Минимальное количество символов 7'
-            })
-        return data
-
-    def create(self, validated_data):
-        password = validated_data.pop('password')
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        fields = ('email', 'id', 'username', 'first_name', 'last_name')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name',
+        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        required_fields = (
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
         )
 
 
@@ -76,7 +60,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True
         )
-    author = UserSerializer(
+    author = UserListSerializer(
         read_only=True,
     )
 
@@ -86,7 +70,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients',
             'name', 'image', 'text', 'cooking_time'
             )
-        # depth = 5
 
 
 class IngredientsEditSerializer(serializers.ModelSerializer):
@@ -102,10 +85,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         max_length=None,
         use_url=True)
-    # tags = serializers.PrimaryKeyRelatedField(
-    #     many=True,
-    #     queryset=Tag.objects.all()
-    #     )
     ingredients = IngredientsEditSerializer(
         many=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -113,7 +92,6 @@ class RecipeEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
-        # read_only_fields = ('author',)
         extra_kwargs = {'tags': {"error_messages": {
             "does_not_exist": "Ошибка в Тэге, id = {pk_value} не существует"}}}
 
@@ -150,10 +128,12 @@ class RecipeEditSerializer(serializers.ModelSerializer):
 
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
-            IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'), )
+            IngredientAmount.objects.bulk_create([
+                IngredientAmount(
+                    recipe=recipe,
+                    ingredient_id=ingredient.get('id'),
+                    amount=ingredient.get('amount'),)
+            ])
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -186,3 +166,20 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = '__all__'
+
+
+class SetPasswordSerializer(PasswordSerializer):
+    current_password = serializers.CharField(
+        required=True,
+        label='Текущий пароль')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        if data['new_password'] == data['current_password']:
+            raise serializers.ValidationError({
+                "new_password": "Пароли не должны совпадать"})
+        check_current = check_password(data['current_password'], user.password)
+        if check_current is False:
+            raise serializers.ValidationError({
+                "current_password": "Введен неверный пароль"})
+        return data
