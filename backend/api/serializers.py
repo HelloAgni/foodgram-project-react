@@ -3,7 +3,8 @@ from django.contrib.auth.hashers import check_password
 from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, IngredientAmount, Recipe, Tag
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Subscribe, Tag)
 from rest_framework import serializers
 
 User = get_user_model()
@@ -183,3 +184,61 @@ class SetPasswordSerializer(PasswordSerializer):
             raise serializers.ValidationError({
                 "current_password": "Введен неверный пароль"})
         return data
+
+
+class SubscribeRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(source='author.email', read_only=True)
+    id = serializers.IntegerField(source='author.id', read_only=True)
+    username = serializers.CharField(
+        source='author.username', read_only=True)
+    first_name = serializers.CharField(
+        source='author.first_name', read_only=True)
+    last_name = serializers.CharField(
+        source='author.last_name', read_only=True)
+    recipes = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
+    recipes_count = serializers.ReadOnlyField(
+        source='author.recipe.count')
+
+    class Meta:
+        model = Subscribe
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
+
+    def validate(self, data):
+        print('Seri', self.context)
+        user = self.context.get('request').user.id
+        author = self.context.get('author_id')
+        if user == int(author):
+            raise serializers.ValidationError(
+                'Нельзя подписаться на самого себя')
+        if Subscribe.objects.filter(user_id=user, author_id=author).exists():
+            raise serializers.ValidationError(
+                'Вы уже подписаны на данного пользователя')
+        return data
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = (
+            obj.author.recipe.all()[:int(limit)] if limit
+            else obj.author.recipe.all())
+        return SubscribeRecipeSerializer(
+            recipes,
+            many=True).data
+
+    def get_is_subscribed(self, obj):
+        subscribe = Subscribe.objects.filter(
+            user=self.context.get('request').user,
+            author=obj.author
+        )
+        if subscribe:
+            return True
+        return False
