@@ -128,7 +128,8 @@ class IngredientAmount(models.Model):
                 name='unique ingredient')]
 
     def __str__(self):
-        return f'{self.amount}, {self.recipe}, {self.ingredient}'
+        return (f'В рецепте {self.recipe.name} {self.amount} '
+                f'{self.ingredient.measurement_unit} {self.ingredient.name}')
 
 
 class FavoriteRecipe(models.Model):

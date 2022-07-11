@@ -1,10 +1,9 @@
 from django.contrib.auth import get_user_model
-# from django.http import HttpResponse
-# from django.db.models.expressions import Exists, OuterRef, Value
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
-from recipes.models import (FavoriteRecipe, Ingredient, Recipe, ShoppingCart,
-                            Subscribe, Tag)
+from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
+                            Recipe, ShoppingCart, Subscribe, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAuthenticated
@@ -30,6 +29,35 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(
+        detail=False,
+        methods=['get'],
+        url_path='download_shopping_cart')
+    def download_file(self, request):
+        # user = request.user
+        user = User.objects.get(id=6)
+        if not user.shopping_cart.exists():
+            return Response(
+                'В корзине нет товаров', status=status.HTTP_400_BAD_REQUEST)
+
+        # Все ID рецептов в корзине
+        recipes = user.shopping_cart.filter(
+            user=user).values_list('recipe_id', flat=True)
+        text = 'Список покупок:\n\n'
+        # Все ID ингр + количество
+        for recipe in recipes:
+            ingr_amount = IngredientAmount.objects.filter(recipe=recipe)
+            for _ in ingr_amount:
+                text += (
+                    f'{_.ingredient.name} ({_.ingredient.measurement_unit})'
+                    f' - {_.amount}\n'
+                )
+        response = HttpResponse(text, content_type='text/plain')
+        filename = 'shopping_list.txt'
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
+        # return Response(status=status.HTTP_101_SWITCHING_PROTOCOLS)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
