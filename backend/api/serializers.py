@@ -4,7 +4,7 @@ from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
-                            Recipe, ShoppingCart, Subscribe, Tag)
+                            Recipe, Subscribe, Tag, ShoppingCart)
 from rest_framework import serializers
 
 User = get_user_model()
@@ -213,7 +213,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
 
     def validate(self, data):
-        print('Seri', self.context)
         user = self.context.get('request').user.id
         author = self.context.get('author_id')
         if user == int(author):
@@ -242,3 +241,38 @@ class SubscribeSerializer(serializers.ModelSerializer):
         if subscribe:
             return True
         return False
+
+
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='favorite_recipe.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='favorite_recipe.name',
+    )
+    image = serializers.CharField(
+        source='favorite_recipe.image',
+        read_only=True,
+    )
+    cooking_time = serializers.ReadOnlyField(
+        source='favorite_recipe.cooking_time',
+    )
+
+    class Meta:
+        model = FavoriteRecipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        recipe = self.context.get('recipe_id')
+        if FavoriteRecipe.objects.filter(user=user,
+                                         favorite_recipe=recipe).exists():
+            raise serializers.ValidationError({
+                'recipe_id': 'Рецепт уже в избранном'})
+        return data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = '__all__'

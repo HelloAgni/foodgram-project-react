@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 User = get_user_model()
 
@@ -124,41 +122,41 @@ class IngredientAmount(models.Model):
         ordering = ('id',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
-        constraints = (
+        constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
-                name='unique ingredient'),
-            )
+                name='unique ingredient')]
 
     def __str__(self):
         return f'{self.amount}, {self.recipe}, {self.ingredient}'
 
 
 class FavoriteRecipe(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        null=True,
-        related_name='favorite_recipe',
-        verbose_name='Пользователь')
-    recipe = models.ManyToManyField(
+        related_name='favorite',
+        verbose_name='Пользователь'
+    )
+    favorite_recipe = models.ForeignKey(
         Recipe,
+        on_delete=models.CASCADE,
         related_name='favorite_recipe',
-        verbose_name='Избранный рецепт')
+        verbose_name='Избранный рецепт'
+    )
 
     class Meta:
-        verbose_name = 'Избранный рецепт'
-        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'favorite_recipe'],
+                name='unique favourite')]
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        ordering = ('id',)
 
     def __str__(self):
-        favorite = [item['name'] for item in self.recipe.values('name')]
-        return f'Пользователь {self.user} добавил {favorite} в избранные.'
-
-    @receiver(post_save, sender=User)
-    def create_favorite_recipe(
-            sender, instance, created, **kwargs):
-        if created:
-            return FavoriteRecipe.objects.create(user=instance)
+        return (f'Пользователь: {self.user.username}'
+                f'рецепт: {self.favorite_recipe.name}')
 
 
 class Subscribe(models.Model):
@@ -190,28 +188,28 @@ class Subscribe(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
-        null=True,
-        verbose_name='Пользователь')
-    recipe = models.ManyToManyField(
+        verbose_name='Пользователь'
+    )
+    recipe = models.ForeignKey(
         Recipe,
-        related_name='shopping_cart',
-        verbose_name='Покупка')
+        on_delete=models.CASCADE,
+        related_name='recipe_shopping_cart',
+        verbose_name='Рецепт'
+    )
 
     class Meta:
-        verbose_name = 'Покупка'
-        verbose_name_plural = 'Покупки'
-        ordering = ('-id',)
+        ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique recipe in shopping cart')]
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Список покупок'
 
     def __str__(self):
-        carts = [item['name'] for item in self.recipe.values('name')]
-        return f'Пользователь {self.user} добавил {carts} в покупки.'
-
-    @receiver(post_save, sender=User)
-    def create_shopping_cart(
-            sender, instance, created, **kwargs):
-        if created:
-            return ShoppingCart.objects.create(user=instance)
+        return (f'Пользователь: {self.user.username},'
+                f'рецепт в списке: {self.recipe.name}')
