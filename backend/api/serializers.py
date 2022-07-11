@@ -4,7 +4,7 @@ from djoser.serializers import (PasswordSerializer, UserCreateSerializer,
                                 UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (FavoriteRecipe, Ingredient, IngredientAmount,
-                            Recipe, Subscribe, Tag, ShoppingCart)
+                            Recipe, ShoppingCart, Subscribe, Tag)
 from rest_framework import serializers
 
 User = get_user_model()
@@ -213,22 +213,18 @@ class SubscribeSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
 
     def validate(self, data):
-        user = self.context.get('request').user.id
+        user = self.context.get('request').user
         author = self.context.get('author_id')
         if user == int(author):
-            raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя')
-        if Subscribe.objects.filter(user_id=user, author_id=author).exists():
-            raise serializers.ValidationError(
-                'Вы уже подписаны на данного пользователя')
+            raise serializers.ValidationError({
+                'user_id': 'Нельзя подписаться на самого себя'})
+        if Subscribe.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError({
+                'user_id': 'Вы уже подписаны на данного пользователя'})
         return data
 
     def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        recipes = (
-            obj.author.recipe.all()[:int(limit)] if limit
-            else obj.author.recipe.all())
+        recipes = obj.author.recipe.all()
         return SubscribeRecipeSerializer(
             recipes,
             many=True).data
@@ -273,6 +269,29 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='recipe.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='recipe.name',
+    )
+    image = serializers.CharField(
+        source='recipe.image',
+        read_only=True,
+    )
+    cooking_time = serializers.ReadOnlyField(
+        source='recipe.cooking_time',
+    )
+
     class Meta:
         model = ShoppingCart
-        fields = '__all__'
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        recipe = self.context.get('recipe_id')
+        if ShoppingCart.objects.filter(user=user,
+                                       recipe=recipe).exists():
+            raise serializers.ValidationError({
+                'recipe_id': 'Рецепт уже добавлен в список покупок'})
+        return data

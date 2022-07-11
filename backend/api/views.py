@@ -127,6 +127,31 @@ class FavoriteRecipeViewSet(CreateDestroyViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ShoppingCartViewSet(viewsets.ModelViewSet):
-    queryset = ShoppingCart.objects.all()
+class ShoppingCartViewSet(CreateDestroyViewSet):
     serializer_class = ShoppingCartSerializer
+
+    def get_queryset(self):
+        user = self.request.user.id
+        return ShoppingCart.objects.filter(user=user)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['recipe_id'] = self.kwargs.get('recipe_id')
+        return context
+
+    def perform_create(self, serializer):
+        serializer.save(
+            user=self.request.user,
+            recipe=get_object_or_404(
+                Recipe,
+                id=self.kwargs.get('recipe_id')
+            )
+        )
+
+    @action(methods=['delete'], detail=True)
+    def delete(self, request, recipe_id):
+        get_object_or_404(
+            ShoppingCart,
+            user=request.user,
+            recipe=recipe_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
