@@ -119,7 +119,7 @@ class SubscribeViewSet(CreateDestroyViewSet):
                 )
         )
 
-    @action(methods=['delete'], detail=True)
+    @action(methods=('delete',), detail=True)
     def delete(self, request, user_id):
         get_object_or_404(
             Subscribe,
@@ -150,7 +150,7 @@ class FavoriteRecipeViewSet(CreateDestroyViewSet):
             )
         )
 
-    @action(methods=['delete'], detail=True)
+    @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
         get_object_or_404(
             FavoriteRecipe,
@@ -180,7 +180,7 @@ class ShoppingCartViewSet(CreateDestroyViewSet):
             )
         )
 
-    @action(methods=['delete'], detail=True)
+    @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
         get_object_or_404(
             ShoppingCart,

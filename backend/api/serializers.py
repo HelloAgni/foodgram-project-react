@@ -88,7 +88,8 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         use_url=True)
     ingredients = IngredientsEditSerializer(
         many=True)
-    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(
+        read_only=True)
 
     class Meta:
         model = Recipe
@@ -97,11 +98,11 @@ class RecipeEditSerializer(serializers.ModelSerializer):
             "does_not_exist": "Ошибка в Тэге, id = {pk_value} не существует"}}}
 
     def validate(self, data):
-        name = data['name']
+        name = data.get('name')
         if len(name) < 4:
             raise serializers.ValidationError({
                     'name': 'Название рецепта минимум 4 символа'})
-        ingredients = data['ingredients']
+        ingredients = data.get('ingredients')
         for ingredient in ingredients:
             if not Ingredient.objects.filter(
                     id=ingredient['id']).exists():
@@ -111,16 +112,16 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         if len(ingredients) != len(set([item['id'] for item in ingredients])):
             raise serializers.ValidationError({
                     'ingredients': 'Ингредиенты не должны повторяться!'})
-        tags = data['tags']
+        tags = data.get('tags')
         if len(tags) != len(set([item for item in tags])):
             raise serializers.ValidationError({
                     'tags': 'Тэги не должны повторяться!'})
-        amounts = data['ingredients']
+        amounts = data.get('ingredients')
         if [item for item in amounts if item['amount'] < 1]:
             raise serializers.ValidationError({
                 'amount': 'Минимальное количество ингридиента 1'
             })
-        cooking_time = data['cooking_time']
+        cooking_time = data.get('cooking_time')
         if cooking_time > 300 or cooking_time < 1:
             raise serializers.ValidationError({
                 'cooking_time': 'Время приготовления блюда от 1 до 300 минут'
@@ -194,14 +195,21 @@ class SubscribeRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source='author.email', read_only=True)
-    id = serializers.IntegerField(source='author.id', read_only=True)
+    email = serializers.CharField(
+        source='author.email',
+        read_only=True)
+    id = serializers.IntegerField(
+        source='author.id',
+        read_only=True)
     username = serializers.CharField(
-        source='author.username', read_only=True)
+        source='author.username',
+        read_only=True)
     first_name = serializers.CharField(
-        source='author.first_name', read_only=True)
+        source='author.first_name',
+        read_only=True)
     last_name = serializers.CharField(
-        source='author.last_name', read_only=True)
+        source='author.last_name',
+        read_only=True)
     recipes = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.ReadOnlyField(
