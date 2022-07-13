@@ -36,7 +36,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=['get'],
+        methods=('get',),
         url_path='download_shopping_cart')
     def download_file(self, request):
         user = request.user
@@ -51,7 +51,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         amount_sum = 'recipe__recipe__amount__sum'
         cart = user.shopping_cart.select_related('recipe').values(
             ingredient_name, ingredient_unit).annotate(Sum(
-                recipe_amount)).order_by()
+                recipe_amount)).order_by(ingredient_name)
         for _ in cart:
             text += (
                 f'{_[ingredient_name]} ({_[ingredient_unit]})'

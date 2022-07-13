@@ -31,7 +31,7 @@ class Tag(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -45,12 +45,16 @@ class Ingredient(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_name_measurement')]
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
 
     def __str__(self):
-        return f'{self.name}, {self.measurement_unit}'
+        return f'{self.name} ({self.measurement_unit})'
 
 
 class Recipe(models.Model):
@@ -73,8 +77,6 @@ class Recipe(models.Model):
     image = models.ImageField(
         'Изображение рецепта',
         upload_to='recipes/images',
-        blank=True,
-        null=True,
     )
     name = models.CharField(
         'Название рецепта',
@@ -98,7 +100,7 @@ class Recipe(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return f'{self.author}, {self.name}'
+        return f'Автор: {self.author.username} рецепт: {self.name}'
 
 
 class IngredientAmount(models.Model):
@@ -185,7 +187,8 @@ class Subscribe(models.Model):
                 name='unique_subscription')]
 
     def __str__(self):
-        return f'Пользователь {self.user}, автор {self.author}'
+        return (f'Пользователь: {self.user.username},'
+                f' автор: {self.author.username}')
 
 
 class ShoppingCart(models.Model):
