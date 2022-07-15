@@ -1,0 +1,11 @@
+id,password,is_superuser,is_staff,is_active,username,email,first_name,last_name
+1,pbkdf2_sha256$260000$iwni43sGa7ZZ7RGPn2ePFU$a+t7RvPRD7FZdSXoMChBCMwIAkV23tACqmvfV2CO0Gc=,1,1,1,admin,admin7@mail.ru,,
+2,pbkdf2_sha256$260000$tu2YtqWOVlEtbNcsan8a8W$qlQMD8IKoTQB+6xgg4A5n6H0nKNxfZJyitNazI+Di28=,0,0,1,Author1,zelik900@yandex.ru,Super cook,Tasty
+3,pbkdf2_sha256$260000$hT8mOl2r4WFcjQ9vGbsGgV$kJqOcRm0iZSygOgq1Dk2Rk51AXjyrAS4Dq4FFu+9DIE=,0,0,1,Author2,zelik800@yandex.ru,Ultra cook,Magic
+4,pbkdf2_sha256$260000$Hqg6yNYBr4TG1xjuRqu1h4$tyzFb6zD9HXv/AZfYXqYUDD2EjPrS6lel91JHbHdWIY=,0,0,1,User1,zelik1@yandex.ru,Вася,Иванов
+5,pbkdf2_sha256$260000$kWJ4SeUK6oZi4MooE9FqYB$97NuMDHuZzf4dcrHuEZsvRL+6WO/nWzAzZbBBeW7pDI=,0,0,1,User2,zelik200@yandex.ru,Петя,Сидоров
+6,pbkdf2_sha256$260000$X2fqCV1MobR2o7QeFn3Zow$kjHPgaVh2uMwGELhaY+dUfZaJGj6URd321hiH1Mld/c=,0,0,1,User3,zelik300@yandex.ru,Валентина,Петрова
+7,pbkdf2_sha256$260000$J9QeiaE5G5IX1AAewCnHal$DhcMbslVcPuLip7VKi0nKIhhRgKaZhRrAB97FPWMwpk=,0,0,1,User4,zelik400@yandex.ru,Валерий,Дмитриев
+8,pbkdf2_sha256$260000$FJGQAhqbjhJTl7TmPjK6Nx$PEJTTm5rQytHP7vOfTz9PbxoLqG0fnY0fhFNr/DO4Nk=,0,0,1,User5,zelik500@yandex.ru,Евгиний,Зайцев
+9,pbkdf2_sha256$260000$jQcnXUAjkVGoOH09XCYNND$6EqO/4gNB8vapnwg4svbbMnW7VY4hN9BaLpL67RRJKg=,0,0,1,User6,zelik600@yandex.ru,Андрей,Федотов
+10,pbkdf2_sha256$260000$a18CgkdnvUDyWLdQPvJNxr$QyVCZEeWX+dnCYGeS7C2jhjXPWxI86gtLvgt68+N9W0=,0,0,1,User7,zelik700@yandex.ru,Жанна,Смирнова

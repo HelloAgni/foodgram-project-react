@@ -110,8 +110,8 @@ class RecipeEditSerializer(serializers.ModelSerializer):
                     'ingredients': f'Ингредиента с id - {ingredient["id"]} нет'
                 })
         if len(ingredients) != len(set([item['id'] for item in ingredients])):
-            raise serializers.ValidationError({
-                    'ingredients': 'Ингредиенты не должны повторяться!'})
+            raise serializers.ValidationError(
+                'Ингредиенты не должны повторяться!')
         tags = data.get('tags')
         if len(tags) != len(set([item for item in tags])):
             raise serializers.ValidationError({
@@ -221,14 +221,15 @@ class SubscribeSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
 
     def validate(self, data):
+        print('validate??')
         user = self.context.get('request').user
         author = self.context.get('author_id')
-        if user == int(author):
+        if user.id == int(author):
             raise serializers.ValidationError({
-                'user_id': 'Нельзя подписаться на самого себя'})
+                'errors': 'Нельзя подписаться на самого себя'})
         if Subscribe.objects.filter(user=user, author=author).exists():
             raise serializers.ValidationError({
-                'user_id': 'Вы уже подписаны на данного пользователя'})
+                'errors': 'Вы уже подписаны на данного пользователя'})
         return data
 
     def get_recipes(self, obj):
@@ -272,7 +273,7 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         if FavoriteRecipe.objects.filter(user=user,
                                          favorite_recipe=recipe).exists():
             raise serializers.ValidationError({
-                'recipe_id': 'Рецепт уже в избранном'})
+                'errors': 'Рецепт уже в избранном'})
         return data
 
 
@@ -301,5 +302,5 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         if ShoppingCart.objects.filter(user=user,
                                        recipe=recipe).exists():
             raise serializers.ValidationError({
-                'recipe_id': 'Рецепт уже добавлен в список покупок'})
+                'errors': 'Рецепт уже добавлен в список покупок'})
         return data

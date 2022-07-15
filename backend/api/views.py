@@ -37,7 +37,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=('get',),
-        url_path='download_shopping_cart')
+        url_path='download_shopping_cart',
+        pagination_class=None)
     def download_file(self, request):
         user = request.user
         if not user.shopping_cart.exists():
@@ -128,6 +129,11 @@ class SubscribeViewSet(CreateDestroyViewSet):
 
     @action(methods=('delete',), detail=True)
     def delete(self, request, user_id):
+        get_object_or_404(User, id=user_id)
+        if not Subscribe.objects.filter(
+                user=request.user, author_id=user_id).exists():
+            return Response({'error': 'Вы не были подписаны на автора'},
+                            status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             Subscribe,
             user=request.user,
@@ -159,6 +165,12 @@ class FavoriteRecipeViewSet(CreateDestroyViewSet):
 
     @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
+        u = request.user
+        if not u.favorite.select_related(
+                'favorite_recipe').filter(
+                    favorite_recipe_id=recipe_id).exists():
+            return Response({'error': 'Рецепт не в избранном'},
+                            status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             FavoriteRecipe,
             user=request.user,
@@ -189,6 +201,12 @@ class ShoppingCartViewSet(CreateDestroyViewSet):
 
     @action(methods=('delete',), detail=True)
     def delete(self, request, recipe_id):
+        u = request.user
+        if not u.shopping_cart.select_related(
+                'recipe').filter(
+                    recipe_id=recipe_id).exists():
+            return Response({'error': 'Рецепта нет в корзине'},
+                            status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             ShoppingCart,
             user=request.user,
