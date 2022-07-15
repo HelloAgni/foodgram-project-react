@@ -11,9 +11,21 @@ User = get_user_model()
 
 
 class UserListSerializer(UserSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name')
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        subscribe = Subscribe.objects.filter(
+            user=self.context.get('request').user,
+            author=obj
+        )
+        if subscribe:
+            return True
+        return False
 
 
 class UserCreateSerializer(UserCreateSerializer):
@@ -64,13 +76,33 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     author = UserListSerializer(
         read_only=True,
     )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = (
-            'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time'
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
             )
+
+    def get_is_favorited(self, obj):
+        favorited = FavoriteRecipe.objects.filter(
+            user=self.context.get('request').user,
+            favorite_recipe=obj
+        )
+        if favorited:
+            return True
+        return False
+
+    def get_is_in_shopping_cart(self, obj):
+        shopping_cart = ShoppingCart.objects.filter(
+            user=self.context.get('request').user,
+            recipe=obj
+        )
+        if shopping_cart:
+            return True
+        return False
 
 
 class IngredientsEditSerializer(serializers.ModelSerializer):

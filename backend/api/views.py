@@ -1,4 +1,7 @@
 from django.contrib.auth import get_user_model
+# from django_filters.rest_framework import DjangoFilterBackend
+from .filters import IngredientFilter, RecipesFilter
+# from rest_framework import filters
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -25,6 +28,7 @@ User = get_user_model()
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
+    filterset_class = RecipesFilter
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -69,6 +73,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -132,7 +137,7 @@ class SubscribeViewSet(CreateDestroyViewSet):
         get_object_or_404(User, id=user_id)
         if not Subscribe.objects.filter(
                 user=request.user, author_id=user_id).exists():
-            return Response({'error': 'Вы не были подписаны на автора'},
+            return Response({'errors': 'Вы не были подписаны на автора'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             Subscribe,
@@ -169,7 +174,7 @@ class FavoriteRecipeViewSet(CreateDestroyViewSet):
         if not u.favorite.select_related(
                 'favorite_recipe').filter(
                     favorite_recipe_id=recipe_id).exists():
-            return Response({'error': 'Рецепт не в избранном'},
+            return Response({'errors': 'Рецепт не в избранном'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             FavoriteRecipe,
@@ -205,7 +210,7 @@ class ShoppingCartViewSet(CreateDestroyViewSet):
         if not u.shopping_cart.select_related(
                 'recipe').filter(
                     recipe_id=recipe_id).exists():
-            return Response({'error': 'Рецепта нет в корзине'},
+            return Response({'errors': 'Рецепта нет в корзине'},
                             status=status.HTTP_400_BAD_REQUEST)
         get_object_or_404(
             ShoppingCart,
