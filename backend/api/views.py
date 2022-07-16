@@ -1,7 +1,4 @@
 from django.contrib.auth import get_user_model
-# from django_filters.rest_framework import DjangoFilterBackend
-from .filters import IngredientFilter, RecipesFilter
-# from rest_framework import filters
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -14,6 +11,7 @@ from rest_framework.permissions import (SAFE_METHODS, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 
+from .filters import IngredientFilter, RecipesFilter
 from .mixins import CreateDestroyViewSet
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (FavoriteRecipeSerializer, IngredientSerializer,

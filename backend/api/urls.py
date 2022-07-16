@@ -8,10 +8,10 @@ from .views import (CustomUserViewSet, FavoriteRecipeViewSet,
 app_name = 'api'
 
 router = routers.DefaultRouter()
-router.register('users', CustomUserViewSet)
-router.register('recipes', RecipeViewSet)
-router.register('ingredients', IngredientViewSet)
-router.register('tags', TagViewSet)
+router.register('users', CustomUserViewSet, basename='users')
+router.register('recipes', RecipeViewSet, basename='recipes')
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register('tags', TagViewSet, basename='tags')
 router.register(
     r'users/(?P<user_id>\d+)/subscribe', SubscribeViewSet,
     basename='subscribe')

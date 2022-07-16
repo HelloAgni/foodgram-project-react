@@ -19,13 +19,11 @@ class UserListSerializer(UserSerializer):
                   'last_name', 'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        subscribe = Subscribe.objects.filter(
-            user=self.context.get('request').user,
-            author=obj
-        )
-        if subscribe:
-            return True
-        return False
+        return (self.context.get('request').user.is_authenticated
+                and Subscribe.objects.filter(
+                    user=self.context.get('request').user,
+                    author=obj
+        ).exists())
 
 
 class UserCreateSerializer(UserCreateSerializer):
@@ -87,22 +85,18 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             )
 
     def get_is_favorited(self, obj):
-        favorited = FavoriteRecipe.objects.filter(
-            user=self.context.get('request').user,
-            favorite_recipe=obj
-        )
-        if favorited:
-            return True
-        return False
+        return (self.context.get('request').user.is_authenticated
+                and FavoriteRecipe.objects.filter(
+                    user=self.context.get('request').user,
+                    favorite_recipe=obj
+        ).exists())
 
     def get_is_in_shopping_cart(self, obj):
-        shopping_cart = ShoppingCart.objects.filter(
-            user=self.context.get('request').user,
-            recipe=obj
-        )
-        if shopping_cart:
-            return True
-        return False
+        return (self.context.get('request').user.is_authenticated
+                and ShoppingCart.objects.filter(
+                    user=self.context.get('request').user,
+                    recipe=obj
+        ).exists())
 
 
 class IngredientsEditSerializer(serializers.ModelSerializer):
@@ -253,7 +247,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count',)
 
     def validate(self, data):
-        print('validate??')
         user = self.context.get('request').user
         author = self.context.get('author_id')
         if user.id == int(author):
