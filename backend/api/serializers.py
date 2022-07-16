@@ -66,11 +66,11 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         many=True,
         source='recipe',
         required=True,
-        )
+    )
     tags = TagSerializer(
         many=True,
         read_only=True
-        )
+    )
     author = UserListSerializer(
         read_only=True,
     )
@@ -82,7 +82,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
-            )
+        )
 
     def get_is_favorited(self, obj):
         return (self.context.get('request').user.is_authenticated
@@ -127,7 +127,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         name = data.get('name')
         if len(name) < 4:
             raise serializers.ValidationError({
-                    'name': 'Название рецепта минимум 4 символа'})
+                'name': 'Название рецепта минимум 4 символа'})
         ingredients = data.get('ingredients')
         for ingredient in ingredients:
             if not Ingredient.objects.filter(
@@ -141,7 +141,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         tags = data.get('tags')
         if len(tags) != len(set([item for item in tags])):
             raise serializers.ValidationError({
-                    'tags': 'Тэги не должны повторяться!'})
+                'tags': 'Тэги не должны повторяться!'})
         amounts = data.get('ingredients')
         if [item for item in amounts if item['amount'] < 1]:
             raise serializers.ValidationError({
@@ -151,7 +151,7 @@ class RecipeEditSerializer(serializers.ModelSerializer):
         if cooking_time > 300 or cooking_time < 1:
             raise serializers.ValidationError({
                 'cooking_time': 'Время приготовления блюда от 1 до 300 минут'
-                })
+            })
         return data
 
     def create_ingredients(self, ingredients, recipe):

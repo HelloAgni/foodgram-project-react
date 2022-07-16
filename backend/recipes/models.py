@@ -118,7 +118,7 @@ class IngredientAmount(models.Model):
         'Количество',
         default=1,
         validators=(MinValueValidator(1, 'Минимум 1'),),
-        )
+    )
 
     class Meta:
         ordering = ('id',)

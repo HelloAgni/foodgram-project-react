@@ -127,7 +127,7 @@ class SubscribeViewSet(CreateDestroyViewSet):
             author=get_object_or_404(
                 User,
                 id=self.kwargs.get('user_id')
-                )
+            )
         )
 
     @action(methods=('delete',), detail=True)
