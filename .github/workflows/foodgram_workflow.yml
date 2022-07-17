@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            cd ~/infra/
+            cd ~/foodgram/
             sudo docker-compose stop
             sudo docker-compose rm -f backend
             touch .env
@@ -83,4 +83,5 @@ jobs:
       with:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: ${{ github.workflow }} успешно выполнен!
+        # message: ${{ github.workflow }} успешно выполнен!
+        message: foodgram-project успешно выполнен!
