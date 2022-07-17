@@ -46,16 +46,17 @@ http://localhost/redoc
 **POSTMAN**  
 Для полноценного использования API необходимо выполнить регистрацию пользователя и получить токен. Инструкция для ***Postman:***
 
-```json
-Получить токен для тестового пользователя если выполнены все импорты:
+Получить токен для тестового пользователя если выполнены все импорты:  
 POST http://localhost/api/auth/token/login/
+```json
 {
     "email": "zelik1@yandex.ru",
     "password": "Qwerty999"
 }
-
-Без импортов, регистрируем нового пользователя
+```
+Без импортов, регистрируем нового пользователя  
 POST http://localhost/api/users/
+```json
 {
     "email": "abcde@yandex.ru",
     "username": "User101",
@@ -63,8 +64,10 @@ POST http://localhost/api/users/
     "last_name": "Иванов",
     "password": "Qwerty777"
 }
-Получаем токен
+```
+Получаем токен  
 POST http://localhost/api/auth/token/login/
+```json
 {
     "password": "Qwerty777",
     "email": "abcde@yandex.ru"
@@ -82,5 +85,6 @@ Response status 200 OK ✅
 Python 3.9, Django 2.2, DRF, Nginx, Docker, Docker-compose, Postgresql, Github Actions.
 
 ***Боевой сервер:***  
-http://redsunset.ddns.net/
+http://redsunset.ddns.net/  
 http://redsunset.ddns.net/api/recipes/
+http://redsunset.ddns.net/api/docs/
