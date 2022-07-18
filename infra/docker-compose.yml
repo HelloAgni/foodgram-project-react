@@ -19,7 +19,7 @@ services:
       - ./.env
 
   frontend:
-    image: agnidock/foodgram_frontend:latest
+    image: agnidock/foodgram_frontend:v1
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
