@@ -11,8 +11,8 @@
  ```bash
 git clone <project>
 cd foodgram-project-react/infra/
-# переименуйте файл <for_env.txt> в <.env>
-mv for_env.txt .env
+# сделайте копию файла <.env.example> в <.env>
+cp .env.example .env
  ```
 
 **Docker**
@@ -86,5 +86,5 @@ Python 3.9, Django 2.2, DRF, Nginx, Docker, Docker-compose, Postgresql, Github A
 
 ***Боевой сервер:***  
 http://redsunset.ddns.net/  
-http://redsunset.ddns.net/api/recipes/
+http://redsunset.ddns.net/api/recipes/  
 http://redsunset.ddns.net/api/docs/
