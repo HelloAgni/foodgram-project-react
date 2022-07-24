@@ -82,7 +82,7 @@ Response status 200 OK ✅
 Полученный токен вставляем Postman -> закладка Headers -> Key(Authorization) -> Value (Ваш токен в формате: Token da6ee....)
 
 ***Технологии:***  
-Python 3.9, Django 2.2, DRF, Nginx, Docker, Docker-compose, Postgresql, Github Actions.
+Python 3.9, Django 3.2, DRF 3.13, Nginx, Docker, Docker-compose, Postgresql, Github Actions.
 
 ***Cервер:***  
 http://redsunset.ddns.net/
