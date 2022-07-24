@@ -85,7 +85,8 @@ Response status 200 OK ✅
 Python 3.9, Django 3.2, DRF 3.13, Nginx, Docker, Docker-compose, Postgresql, Github Actions.
 
 ***Cервер:***  
-http://redsunset.ddns.net/
+http://redsunset.ddns.net/  
+http://redsunset.ddns.net/api/docs/
 
 ***Превью***  
 <img src="https://github.com/HelloAgni/foodgram-project-react/blob/master/backend/media/recipes/images/preview.jpg" alt="img" width="600" height='350'>
