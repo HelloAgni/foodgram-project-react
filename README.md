@@ -88,4 +88,4 @@ Python 3.9, Django 2.2, DRF, Nginx, Docker, Docker-compose, Postgresql, Github A
 http://redsunset.ddns.net/
 
 ***Превью***  
-<img src="https://github.com/HelloAgni/foodgram-project-react/tree/master/backend/media/recipes/images/preview.png" alt="img" width="600" height='350'>
+<img src="https://github.com/HelloAgni/foodgram-project-react/blob/master/backend/media/recipes/images/preview.jpg" alt="img" width="600" height='350'>
