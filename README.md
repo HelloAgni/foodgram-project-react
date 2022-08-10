@@ -79,14 +79,14 @@ Response status 200 OK ✅
     "token": "eyJ0e..........."
 }
 ```
-Полученный токен вставляем Postman -> закладка Headers -> Key(Authorization) -> Value (Ваш токен в формате: Token da6ee....)
+Полученный токен вставляем Postman -> закладка Headers -> Key(Authorization) -> Value (Ваш токен в формате: Token da6ee....)  
 
 ***Технологии:***  
-Python 3.9, Django 3.2, DRF 3.13, Nginx, Docker, Docker-compose, Postgresql, Github Actions.
-
+Python 3.9, Django 3.2, DRF 3.13, Nginx, Docker, Docker-compose, Postgresql, Github Actions.  
+<!-- 
 ***Cервер:***  
 http://redsunset.ddns.net/  
-http://redsunset.ddns.net/api/docs/
+http://redsunset.ddns.net/api/docs/ -->
 
 ***Превью***  
 <img src="https://github.com/HelloAgni/foodgram-project-react/blob/master/backend/media/recipes/images/preview.jpg" alt="img" width="600" height='350'>
